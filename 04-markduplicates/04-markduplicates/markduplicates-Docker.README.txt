@@ -1,6 +1,0 @@
-Directories
-
-Dockerfile-v1 
-	--> has the image to run Docker markduplicates by PICARD .. no references need to be given
-	--> image name vifehe/bamtocram
-	--> built 2019-08-13
