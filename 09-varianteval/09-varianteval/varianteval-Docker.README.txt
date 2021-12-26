@@ -1,0 +1,17 @@
+Directories
+
+Dockerfile-v1
+	--> has the images to run Docker varianteval wiht GATKv3.6 
+	--> It asks for the REFS and BEDFILE for either covered or padded exome
+	--> image name vifehe/variantevalref:0.2
+	--> built 2019-08-30
+	
+Dockerfile-v2
+	--> has the images to run Docker varianteval wiht GATKv3.6 
+	--> It asks for the REFS and BEDFILE for either covered or padded exome
+	--> image name vifehe/variantevalref:1.2
+	--> built 2019-11-07
+	--> incorporates a final step of cleaning INPUT and INTERMEDIATE files, which are given in an array format
+	--> on 2019-11-21:
+		- sudo docker build 09-varianteval/Dockerfile-v2/ -t vifehe/variantevalref:1.2
+		- sudo docker push vifehe/variantevalref:1.2

@@ -1,0 +1,56 @@
+#### Building DOCKER image for GATK-4.0
+# Specify the base image -- here we're using one that bundles the OpenJDK version of Java 8 on top of a generic Debian Linux OS
+# OpenJDK is an open-source implementation of the Java Platform, Standard Edition
+FROM openjdk:8-jre
+LABEL maintainer="Achal Neupane <achal@wustl.edu>"
+
+LABEL org.label-schema.schema-version="1.0"
+# LABEL org.label-schema.build-date=$BUILD_DATE
+LABEL org.label-schema.name="achalneupane/haplocallerv2"
+LABEL org.label-schema.description="Image for GATK-4"
+
+#Set the working directory to be used when the docker gets run
+WORKDIR /tmp   #necessary?
+
+# Do a few updates of the base system and install R (via the r-base package)
+RUN apt-get update -y && apt-get install -y \
+    ant \
+    apt-utils \
+    build-essential \
+    bzip2 \
+    default-jdk \
+    default-jre \
+    gcc-multilib \
+    git \
+    libncurses5-dev \
+    libnss-sss \
+    nodejs \
+    python-dev \
+    python-pip \
+    r-base \
+    tzdata \
+    time \
+	unzip \
+    wget \
+    zlib1g-dev
+
+
+##################
+#### GATK 4.1.2.0 ####
+##################
+
+#Install GATK4
+RUN cd /tmp/ \
+	&& wget -q 'https://github.com/broadinstitute/gatk/releases/download/4.1.2.0/gatk-4.1.2.0.zip' \
+    && unzip gatk-4.1.2.0.zip \
+	&& cp -av /tmp/gatk-4.1.2.0 /usr/bin/
+
+## Export gatk directory ti environmental variables
+## if using this export then later call GATK using  ${GATKv4}
+ENV GATKv4 /usr/bin/gatk-4.1.2.0/gatk  
+## if using this export then just call GATK using ./gatk from your WORKDIR
+#ENV PATH=/usr/bin/gatk-4.1.2.0:$PATH   
+
+# helper scripts
+COPY ./entrypoint.sh /usr/bin/entrypoint.sh
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
