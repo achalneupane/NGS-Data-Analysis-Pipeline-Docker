@@ -2,7 +2,7 @@
 
 # Docker images for NGS data analysis
 
-## Achal Neupane, PhD <br/> [Washington University in St. Louis, Neurogenomics and Informatics Lab <br/> McDonnell Genome Institute]
+## Achal Neupane, PhD
 
 [Summary](#summary)
 
