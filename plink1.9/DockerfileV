@@ -1,0 +1,20 @@
+FROM ubuntu:18.04
+
+LABEL maintainer="Achal Neupane <achal@wustl.edu>"
+
+LABEL org.label-schema.name="achalneupane/plink"
+LABEL org.label-schema.description="Image for plink"
+
+
+RUN apt-get update \
+	&& apt-get install -y wget libxml-libxml-perl zip
+
+RUN cd /tmp/ \
+	&& wget -q 'http://s3.amazonaws.com/plink1-assets/plink_linux_x86_64_20200616.zip' \
+    && unzip plink_linux_x86_64_20200616.zip \
+	&& cp -av /tmp/plink /usr/bin/
+
+
+## if using this export then just call GATK using ./gatk from your WORKDIR
+
+ENV PATH=/usr/bin/:$PATH  

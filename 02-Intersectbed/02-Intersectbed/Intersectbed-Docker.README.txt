@@ -1,0 +1,10 @@
+Directories
+
+Dockerfile-v1 
+	--> has the images to run Docker Intersectbed with the reference given in the entrypoint
+	--> image name achalneupane/intersectbed
+	--> built 09-18-2020
+Dockerfile-v2
+	--> has the images to run Docker Intersectbed with the reference defined as an export command
+	--> image name achalneupane/intersectbedref
+	--> built 09-20-2020

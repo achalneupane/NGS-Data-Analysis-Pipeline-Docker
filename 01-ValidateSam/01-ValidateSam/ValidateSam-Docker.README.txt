@@ -1,0 +1,10 @@
+Directories
+
+Dockerfile-v1 
+	--> has the images to run Docker ValidateSam with the reference given in the entrypoint
+	--> image name achalneupane/validatesam
+	--> built 08-016-2020
+Dockerfile-v2
+	--> has the images to run Docker ValidateSam with the reference defined as an export command
+	--> image name achalneupane/validatesamref
+	--> built 09-09-2020

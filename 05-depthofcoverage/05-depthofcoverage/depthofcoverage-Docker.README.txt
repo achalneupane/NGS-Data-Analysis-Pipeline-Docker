@@ -1,0 +1,7 @@
+Directories
+
+Dockerfile 
+	--> has the images to run Docker depthofcoverage wiht GATKv3.5 
+	--> it requires REF to be given as export parameter 
+	--> image name vifehe/depthofcoverage
+	--> built 2019-08-30
