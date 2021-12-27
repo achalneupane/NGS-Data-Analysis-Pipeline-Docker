@@ -70,7 +70,7 @@ project)](#appendix-d--bam-to-fastq-processing-specific-to-the-adni-project)
 Here, I intend to summarize all the details involved in the
 processing and QC (Figure 1) of whole exome and whole genome sequence data for
 Alzheimers Disesease projects at the Cruchaga Lab at Washington University in St
-Louis. This report also provides brief summary pipelines required to process
+Louis. This report also provides brief summary of pipelines required to process
 sequencing data. Our latest datafreeze, Bloomfield, was completed in October
 2021.
 
