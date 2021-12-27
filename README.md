@@ -526,7 +526,7 @@ WXS column where 1 represents WGS sequencing type and 2 represents WES.
 ```
 BFILE="Bloomfield_9810-hwe-geno0.05-mind0.1"
 
-METADATA="/40/AD/AD_Seq_Data/05.-Analyses/07-Bloomfield_202109/01-Bloomfield-preQC/Bloomfield_9810_metadata.txt"
+METADATA="${DIR}/01-Bloomfield-preQC/Bloomfield_9810_metadata.txt"
 
 plink1.9 --bfile ../02-intermediate-filtering-files/\${BFILE} --pheno
 \${METADATA} --pheno-name WXS --test-missing --allow-no-sex --out
