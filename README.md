@@ -109,9 +109,6 @@ servers, immediately process them, and delete the raw and unnecessary files
 after successful completion of each variant calling step in the pipeline (See
 Appendix A)
 
-The docker images for NGS pipelines on Github page of NGI center, will be
-available at <https://github.com/NeuroGenomicsAndInformatics/dockerNGS>
-
 In summary, here are the series of steps (in order) we followed to process these
 datasets; this pipeline assumes the starting file are fastq; for projects with
 different starting raw data, refer to “Alternative pipelines” section:
