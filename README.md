@@ -864,1320 +864,746 @@ WORKLIST is the list of all FULLSMs to be processed for gVCF. \$number is the
 Nth sample being processed in the \$WORKLIST.
 ```
 export BASE="/gscmnt/gc2645/wgs"; \\
-
 export WORKDIR="\${BASE}/tmp"; \\
-
 export THREADS=16; \\
-
 export BWA_PIPE_SORT=1; \\
-
 export TIMING=1; \\
-
 LOOKUP_COL_SM=1; \\
-
 LOOKUP_COL_DNA=2; \\
-
 LOOKUP_COL_PR=3; \\
-
 LOOKUP_COL_RGBASE=4; \\
-
 LOOKUP_COL_FQ1EXT=5; \\
-
 LOOKUP_COL_FQ2EXT=6; \\
-
 export RUN_TYPE="paddedexome"; \\
-
 for FULLSM in \$(sed -n "\${START},\${END}p" "\${WORKLIST}"); do \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 echo "Doing sample number\*\*\*\*\*\*\*\*\*\*: " \$Snumber; \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 ((Snumber=\${Snumber}+1)); \\
-
 SM="\$(echo "\${FULLSM}" \| cut -d\^ -f1)"; \\
-
 IFS=\$'\\n' export DNA=(\$(awk -F, "\\\$\${LOOKUP_COL_SM} == \\"\${SM}\\""
 "\${LOOKUP}" \| cut -d, -f\${LOOKUP_COL_DNA} \| sort -u)); \\
-
 if [ \${\#DNA[@]} -gt 1 ]; then echo "Warning, \\\${DNA} not unique for \${SM}
 (n=\${\#DNA[@]}: \${DNA[@]})"; fi; \\
-
 DNA="\$(echo "\${FULLSM}" \| cut -d\^ -f2)"; \\
-
 PR="\$(echo "\${FULLSM}" \| cut -d\^ -f3)"; \\
-
 export OUT_DIR="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}"; \\
-
 echo -e "00 - Starting jobs per sample FULLSM \${FULLSM}"; \\
-
 for RGBASE in \$(grep "\${SM},\${DNA},\${PR}" "\${LOOKUP}" \| cut -d,
 \-f\${LOOKUP_COL_RGBASE}); do \\
-
 SM="\$(echo "\${FULLSM}" \| cut -d\^ -f1)"; \\
-
 DNA="\$(echo "\${FULLSM}" \| cut -d\^ -f2)"; \\
-
 PR="\$(echo "\${FULLSM}" \| cut -d\^ -f3)"; \\
-
 FBASE="/40/AD/AD_Seq_Data/01.-RawData/201907_USUHS_gDNA_SHERMAN/01.-RawData"; \\
-
 \# folder where RG files are located \\
-
 RBASE="/home/achal/01.-RawData/201907_USUHS_gDNA_SHERMAN/201907_USUHS_gDNA_SHERMAN";
 \\
-
 FQ1EXT=(\$(awk -F, "\\\$\${LOOKUP_COL_RGBASE} == \\"\${RGBASE}\\"" "\${LOOKUP}"
 \| cut -d, -f\${LOOKUP_COL_FQ1EXT})); \\
-
 FQ2EXT=(\$(awk -F, "\\\$\${LOOKUP_COL_RGBASE} == \\"\${RGBASE}\\"" "\${LOOKUP}"
 \| cut -d, -f\${LOOKUP_COL_FQ2EXT})); \\
-
 RGFILE="\${RBASE}/\${RGBASE}.rgfile"; \\
-
 FQ1="\${FBASE}/\${RGBASE}\${FQ1EXT}"; \\
-
 FQ2="\${FBASE}/\${RGBASE}\${FQ2EXT}"; \\
-
 DEST="\${BASE}/WXS_Aquilla/01-RAW"; \\
-
 echo -e "00a - Uploading FASTQ and rgfiles for sample \${FULLSM} and RGBASE
 \${RGBASE}\\nFQ1:\${FQ1}\\nFQ2:\${FQ2}\\nRGFILE:\${RGFILE}\\nDNA:\${DNA}"; \\
-
 mkdir \${DEST}/\${PR}/\${FULLSM}; \\
-
 \#\#\# rsync with copy referent files as we are copying symlinks for this PPMI
 data from fenix
-
 rsync -avh -L \${USER}@fenix.psych.wucon.wustl.edu:\${FQ1}
 \${DEST}/\${PR}/\${FULLSM}/; \\
-
 rsync -avh -L \${USER}@fenix.psych.wucon.wustl.edu:\${FQ2}
 \${DEST}/\${PR}/\${FULLSM}/; \\
-
 rsync -avh \${USER}@fenix.psych.wucon.wustl.edu:\${RGFILE}
 \${DEST}/\${PR}/\${FULLSM}/; \\
-
 export RGFILE="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.rgfile";
 \\
 
 export FULLSM_RGID="\${RGBASE}"; \\
-
 unset BAMFILE; \\
-
 echo -e "01 - Starting bwa per sample \${FULLSM} and RGBASE \${RGBASE}"; \\
-
 export RGFILE="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.rgfile";
 \\
-
 export FQ1="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}\${FQ1EXT}";
 \\
-
 export FQ2="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}\${FQ2EXT}";
 \\
-
 export REF="\${BASE}/Genome_Ref/GRCh38/Homo_sapiens_assembly38.fasta"; \\
-
 echo \$FQ1; \\
-
 echo \$FQ1; \\
-
 export CLEANUP=1;
-
 export REMOVE_INPUT=1; \\
-
 echo \$RGFILE; \\
-
 export MEM=65; \\
-
 bsub \\
-
 \-J "\${RGBASE}_s01alnsrt" \\
-
 \-o "\${BASE}/WXS_Aquilla/04-LOGS/\${RGBASE}_s01alnsrt.%J" \\
-
 \-u "\${EMAIL}" \\
-
 \-n \${THREADS} -W 4320 \\
-
 \-M 86000000 \\
-
 \-R "rusage[mem=89152]" \\
-
 \-q research-hpc \\
-
 \-a 'docker(achalneupane/bwaref)' \\
-
 entrypoint.sh; \\
-
 echo -e "02 - Starting validatesam per sample \${FULLSM} and RGBASE
 \${RGBASE}\\nBAMFILE:\${BAMFILE}"; \\
 
 export MEM=16; \\
-
 export
 BAMFILE="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}/\${RGBASE}.aln.srt.bam";
 \\
-
 echo \${BAMFILE}; \\
-
 export REF="\${BASE}/Genome_Ref/GRCh38/Homo_sapiens_assembly38.fasta"; \\
-
 bsub \\
-
 \-w "done(\\"\${RGBASE}_s01alnsrt\\")" \\
-
 \-J "\${RGBASE}_s02vldate" \\
-
 \-o "\${BASE}/WXS_Aquilla/04-LOGS/\${RGBASE}_s02vldate.%J" \\
-
 \-u "\${EMAIL}" \\
-
 \-n1 -W 1360 \\
-
 \-R "rusage[mem=18192]" \\
-
 \-q research-hpc \\
-
 \-a "docker(achalneupane/validatesamref)" \\
-
 entrypoint.sh -IGNORE INVALID_VERSION_NUMBER -IGNORE INVALID_TAG_NM; \\
-
 echo -e "03 - Starting intersectbed per sample \${FULLSM} and RGBASE
 \${RGBASE}\\nBAMFILE:\${BAMFILE}"; \\
-
 export RUN_TYPE="paddedexome"; \\
-
 export BEDFILE="\${BASE}/Genome_Ref/GRCh38/Capture_Padded.GRCh38.bed"; \\
-
 export COVERED_BED="\${BASE}/Genome_Ref/GRCh38/Capture_Covered.GRCh38.bed"; \\
-
 export PADDED_BED="\${BASE}/Genome_Ref/GRCh38/Capture_Padded.GRCh38.bed";\\
-
 export REF="\${BASE}/Genome_Ref/GRCh38/Homo_sapiens_assembly38.fasta"; \\
-
 export
 BAMFILE="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}/\${RGBASE}.aln.srt.bam";
 \\
-
 bsub \\
-
 \-w "done(\\"\${RGBASE}_s02vldate\\")" \\
-
 \-J "\${RGBASE}_s03intsct" \\
-
 \-o "\${BASE}/WXS_Aquilla/04-LOGS/\${RGBASE}_s03intsct.%J" \\
-
 \-u "\${EMAIL}" \\
-
 \-n1 -W 1360 \\
-
 \-q research-hpc \\
-
 \-a "docker(achalneupane/intersectbedref)" \\
-
 entrypoint.sh; \\
-
 echo -e "04 - Starting validatesam per sample \${FULLSM} and RGBASE
 \${RGBASE}\\nBAMFILE:\${BAMFILE}"; \\
-
 export
 BAMFILE="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}/\${RGBASE}.aln.srt.isec-\${RUN_TYPE}.bam";
 \\
-
 bsub \\
-
 \-w "done(\\"\${RGBASE}_s03intsct\\")" \\
-
 \-J "\${RGBASE}_s04vldate" \\
-
 \-o "\${BASE}/WXS_Aquilla/04-LOGS/\${RGBASE}_s04vldate.%J" \\
-
 \-u "\${EMAIL}" \\
-
 \-n1 -W 1360 \\
-
 \-R "rusage[mem=18192]" \\
-
 \-q research-hpc \\
-
 \-a "docker(achalneupane/validatesamref)" \\
-
 entrypoint.sh -IGNORE INVALID_VERSION_NUMBER -IGNORE INVALID_TAG_NM -IGNORE
 MATE_NOT_FOUND; \\
-
 echo -e "05 - Starting bamtocram per sample \${FULLSM} and RGBASE
 \${RGBASE}\\nBAMFILE:\${BAMFILE}\\nOUT_DIR:\${OUT_DIR}";\\
-
 export
 BAMFILE="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}/\${RGBASE}.aln.srt.bam";
 \\
-
 export OUT_DIR="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}/"; \\
-
 done; \\
-
 echo -e "DONE ANALYZING RGBASES per sample \${FULLSM}";\\
-
 IFS=\$'\\n' RGBASES=(\$(grep "\${FULLSM}" "\${LOOKUP}" \| cut -d,
 \-f\${LOOKUP_COL_RGBASE})); \\
-
 INPUT_LIST=(); \\
-
 WAIT_LIST=(); \\
-
 CLEANUP_LIST=(); \\
-
 for RGBASE in \${RGBASES[@]}; do \\
-
 INPUT_LIST+=("\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}/\${RGBASE}.aln.srt.isec-\${RUN_TYPE}.bam");
 \\
-
 WAIT_LIST+=("&&" "done(\\"\${RGBASE}_s04vldate\\")"); \\
-
 CLEANUP_LIST+=("\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.\${FQ1EXT}");
 \\
-
 CLEANUP_LIST+=("\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.\${FQ2EXT}");
 \\
-
 done; \\
-
 echo -e "06 - Starting markduplicates for FULLSM \${FULLSM} with
 INPUT_LIST:\${INPUT_LIST[@]}"; \\
-
 export FULLSM="\${FULLSM}"; \\
-
 export MEM=32; \\
-
 export OUT_DIR="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}/"; \\
-
 bsub \\
-
 \-w \${WAIT_LIST[@]:1} \\
-
 \-J "\${FULLSM}_s06mrkdup" \\
-
 \-o "\${BASE}/WXS_Aquilla/04-LOGS/\${FULLSM}_s06mrkdup.%J" \\
-
 \-u "\${EMAIL}" \\
-
 \-n1 -W 1440 \\
-
 \-M 46000000 \\
-
 \-R "rusage[mem=49152]" \\
-
 \-q research-hpc \\
-
 \-a "docker(achalneupane/markduplicates)" \\
-
 \${INPUT_LIST[@]};
 ```
 ### Appendix B – Pipeline B
-
 ```
 START=1;
-
 END=1;
-
 SHELLDROP=1
-
 Snumber=1;
-
 export BASE="/gscmnt/gc2645/wgs"; \\
-
 export WORKDIR="\${BASE}/tmp"; \\
-
 export THREADS=16; \\
-
 export BWA_PIPE_SORT=1; \\
-
 export TIMING=1; \\
-
 LOOKUP_COL_SM=1; \\
-
 LOOKUP_COL_DNA=2; \\
-
 LOOKUP_COL_PR=3; \\
-
 LOOKUP_COL_RGBASE=4; \\
-
 LOOKUP_COL_FQEXT=5; \\
-
 LOOKUP_COL_RGBASEtemp=6; \\
-
 unset FBASE; \\
-
 export RUN_TYPE="paddedexome"; \\
-
 export FASTQ_TYPE="interleaved"; \\
-
 export MODE="fq"; \\
-
 for FULLSM in \$(sed -n "\${START},\${END}p" "\${WORKLIST}"); do \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 echo "Doing sample number\*\*\*\*\*\*\*\*\*\*: " \${Snumber}; \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 echo
 "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
 \\
-
 ((Snumber=\${Snumber}+1)); \\
-
 SM="\$(echo "\${FULLSM}" \| cut -d\^ -f1)"; \\
-
 IFS=\$'\\n' export DNA=(\$(awk -F, "\\\$\${LOOKUP_COL_SM} == \\"\${SM}\\""
 "\${LOOKUP}" \| cut -d, -f\${LOOKUP_COL_DNA} \| sort -u)); \\
-
 if [ \${\#DNA[@]} -gt 1 ]; then echo "Warning, \\\${DNA} not unique for \${SM}
 (n=\${\#DNA[@]}: \${DNA[@]})"; fi; \\
-
 SM="\$(echo "\${FULLSM}" \| cut -d\^ -f1)"; \\
-
 DNA="\$(echo "\${FULLSM}" \| cut -d\^ -f2)"; \\
-
 PR="\$(echo "\${FULLSM}" \| cut -d\^ -f3)"; \\
-
 export OUT_DIR="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}"; \\
-
 echo -e "00 - Starting jobs per sample FULLSM \${FULLSM}"; \\
-
 for RGBASE in \$(grep "\${SM},\${DNA},\${PR}" "\${LOOKUP}" \| cut -d,
 \-f\${LOOKUP_COL_RGBASE}); do \\
-
 FULLSMtemp="\${SM}\^unk\^\${PR}"; \\
-
 FBASEtemp="/40/AD/AD_Seq_Data/01.-RawData/CACHE_WGS/01.-RawData/\${FULLSMtemp}";
 \\
-
 FBASE="/40/AD/AD_Seq_Data/01.-RawData/CACHE_WGS/01.-RawData/\${FULLSM}"; \\
-
 FQEXT=(\$(awk -F, "\\\$\${LOOKUP_COL_RGBASE} == \\"\${RGBASE}\\"" "\${LOOKUP}"
 \| cut -d, -f\${LOOKUP_COL_FQEXT})); \\
-
 RGBASEtemp=(\$(awk -F, "\\\$\${LOOKUP_COL_RGBASE} == \\"\${RGBASE}\\""
 "\${LOOKUP}" \| cut -d, -f\${LOOKUP_COL_RGBASEtemp})); \\
-
 RGFILEtemp="\${FBASEtemp}/\${RGBASEtemp}.rgfile"; \\
-
 RGFILE="\${FBASE}/\${RGBASE}.rgfile";\\
-
 FQtemp="\${FBASEtemp}/\${RGBASEtemp}.\${FQEXT}";\\
-
 FQ="\${FBASE}/\${RGBASE}.\${FQEXT}"; \\
-
 DEST="\${BASE}/WXS_Aquilla/01-RAW";\\
-
 echo -e "00a - Uploading FASTQ and rgfiles for sample \${FULLSM} and RGBASE
 \${RGBASE}\\nFQ:\${FQ}\\nRGFILE:\${RGFILE}\\nDNA:\${DNA}"; \\
-
 mkdir \${DEST}/\${PR}/\${FULLSM}; \\
-
 rsync -avh -L \${USER}@fenix.psych.wucon.wustl.edu:\${FQtemp}
 \${DEST}/\${PR}/\${FULLSM}/ ;\\
-
 mv -f "\${DEST}/\${PR}/\${FULLSM}/\${RGBASEtemp}.\${FQEXT}"
 "\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.\${FQEXT}"; \\
-
 rsync -avh \${USER}@fenix.psych.wucon.wustl.edu:\${RGFILEtemp}
 \${DEST}/\${PR}/\${FULLSM}/ ;\\
-
 mv -f "\${DEST}/\${PR}/\${FULLSM}/\${RGBASEtemp}.rgfile"
 "\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.rgfile"; \\
-
 export RGFILE="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.rgfile";
 \\
-
 export FULLSM_RGID="\${RGBASE}"; \\
-
 unset BAMFILE; \\
-
 unset FQ1; \\
-
 unset FQ2; \\
-
 IFS=\$'\\n' FQEXT=(\$(awk -F, "\\\$\${LOOKUP_COL_RGBASE} == \\"\${RGBASE}\\""
 "\${LOOKUP}" \| cut -d, -f\${LOOKUP_COL_FQEXT})); \\
-
 echo -e "01 - Starting bwa per sample \${FULLSM} and RGBASE \${RGBASE}";\\
-
 export RGFILE="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.rgfile";
 \\
-
 export FQ="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.\${FQEXT}";
 \\
-
 export REF="\${BASE}/Genome_Ref/GRCh38/Homo_sapiens_assembly38.fasta"; \\
-
 export MEM=32; \\
-
 bsub \\
-
 \-J "\${RGBASE}_s01alnsrt" \\
-
 \-o "\${BASE}/WXS_Aquilla/04-LOGS/\${RGBASE}_s01alnsrt.%J" \\
-
 \-u "\${EMAIL}" \\
-
 \-n \${THREADS} -W 2160 \\
-
 \-M 46000000 \\
-
 \-R "rusage[mem=49152]" \\
-
 \-q research-hpc \\
-
 \-a 'docker(achalneupane/bwaref)' \\
-
 entrypoint.sh; \\
-
 \# The rest of the code after achalneupane/bwaref is the same as in Appendix A
 !!
 ```
 ### Appendix C – pipeline C Cram or Bam to FastQ
-
-
 1.  Helper script to feed input CRAM/BAM and unwrap them into FASTQ (replace
     “.crai” with “.bai” if using BAM as an input)
-
 ```
     Snumber=1
-
     START=1; \\
-
     END=156; \\
-
     DELAY=10
-
     EMAIL="achal@wustl.edu"
-
     SHELLDROP=0
-
     export BASE="/gscmnt/gc2645/wgs"; \\
-
     export WORKDIR="\${BASE}/tmp"; \\
-
     export THREADS=16; \\
-
     export BWA_PIPE_SORT=1; \\
-
     export TIMING=1;\\
-
     PR="202103_ADSP_FUS-familial_WGS_UNNAMED"; \\
-
     WORKLIST="\${BASE}/WXS_Aquilla/01-RAW/\${PR}-worklist_fullsm.csv"; \\
-
     LOOKUP="\${BASE}/WXS_Aquilla/01-RAW/\${PR}-MGIID-sm-dna-pr-rgbase-cram-smdir-cramloc.csv";
     \\
-
     LOOKUP_COL_SM=2; \\
-
     LOOKUP_COL_DNA=3; \\
-
     LOOKUP_COL_PR=4; \\
-
     LOOKUP_COL_CRAMFILE=5; \\
-
     export RUN_TYPE="paddedexome"; \\
-
     for FULLSM in \$(sed -n "\${START},\${END}p" "\${WORKLIST}"); do \\
-
     echo
     "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
     \\
-
     echo
     "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
     \\
-
     echo "Doing sample
     number\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*:
     " \$Snumber; \\
-
     echo
     "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
     \\
-
     echo
     "\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*";
     \\
-
     ((Snumber=Snumber+1)); \\
-
     export FULLSM="\${FULLSM}"; \\
-
     SM="\$(echo "\${FULLSM}" \| cut -d\^ -f1)"; \\
-
     IFS=\$'\\n' export DNA=(\$(awk -F, "\\\$\${LOOKUP_COL_SM} == \\"\${SM}\\""
     "\${LOOKUP}" \| cut -d, -f\${LOOKUP_COL_DNA} \| sort -u)); \\
-
     if [ \${\#DNA[@]} -gt 1 ]; then echo "Warning, \\\${DNA} not unique for
     \${SM} (n=\${\#DNA[@]}: \${DNA[@]})"; fi; \\
-
     DNA="\$(echo "\${FULLSM}" \| cut -d\^ -f2)"; \\
-
     PR="\$(echo "\${FULLSM}" \| cut -d\^ -f3)"; \\
-
     CRAM="\$(grep "\${SM},\${DNA},\${PR}" "\${LOOKUP}" \| cut -d,
     \-f\${LOOKUP_COL_CRAMFILE})"
-
     export OUT_DIR="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}"; \\
-
     INPUT_LIST=(); \\
-
     WAIT_LIST=(); \\
-
     rsync -avh \${USER}@fenix.psych.wucon.wustl.edu:\${CRAMLOC}/\${CRAM}
     \${OUT_DIR}/; \\
-
     rsync -avh \${USER}@fenix.psych.wucon.wustl.edu:\${CRAMLOC}.\${CRAM}.crai
-
     \${OUT_DIR}/; \\
-
     export MEM=16; \\
-
     export CREATE_RGFILE=1; \\
-
     export DEBUG=1; \\
-
     export REMOVE_INPUT=1; \\
-
     export OUT_DIR="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}" ;\\
-
     export REF="\${BASE}/Genome_Ref/GRCh38/Homo_sapiens_assembly38.fasta"; \\
-
     export CRAMBASE="\$(echo \${CRAM/.cram/})"; \\
-
     export CRAMFILE="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${CRAM}"; \\
-
     echo -e "OUTPUT is in
     "\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${CRAMBASE}_s00rvtcram.%J"
     \\n OUTDIR is \${OUT_DIR}";\\
-
     bsub \\
-
     \-J "\${FULLSM}_s00rvtcram" \\
-
     \-o
     "\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${CRAMBASE}_s00rvtcram.%J"
     \\
-
     \-u "\${EMAIL}" \\
-
     \-n1 -W 1440 \\
-
     \-R "rusage[mem=18192]" \\
-
     \-q research-hpc \\
-
     \-a 'docker(achalneupane/cram2fastq)' \\
-
     /bin/bash; \\
-
     echo -e "00b - Starting revertcram for
     \${FULLSM}\\n\${CRAMFILE}\\n\${SM}\\n\${DNA}\\n\${PR}"; \\
-
     SAMTOOLS="/gscmnt/gc2645/wgs/variant_calling/samtools"; \\
-
     IFS=\$'\\n' RGS=(\$(\${SAMTOOLS} view -H "\${CRAMFILE}" \| grep "\^@RG"));
     \\
-
     for RG in \${RGS[@]}; do RGID="\$(echo \${RG} \| grep -oP
     "(?\<=ID:)[\^[:space:]]\*")"; \\
-
     RGID_NEW="\$(echo \${RGID} \| cut -d: -f2- \| sed 's/:/\^/g')"; \\
-
     RGBASE="\${FULLSM}.\${RGID_NEW}"; \\
-
     echo -e "01 - Starting bwa per sample \${FULLSM} and RGBASE
     \${RGBASE}\\nFQ1:\${FQ1}\\nFQ2:\${FQ2}\\nRGFILE:\${RGFILE}\\nDNA:\${DNA}\\nPR:\${PR}\\nIFS:\${IFS}";\\
-
     export
     RGFILE="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.rgfile"; \\
-
     export FULLSM_RGID="\${RGBASE}"; \\
-
     unset BAMFILE; \\
-
     export OUT_DIR="\${BASE}/WXS_Aquilla/02-TRANSIT/\${PR}/\${FULLSM}"; \\
-
     FQ1EXT="r1.fastq"; \\
-
     FQ2EXT="r2.fastq"; \\
-
     export
     FQ1="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.\${FQ1EXT}";
     \\
-
     export
     FQ2="\${BASE}/WXS_Aquilla/01-RAW/\${PR}/\${FULLSM}/\${RGBASE}.\${FQ2EXT}";
     \\
-
     export REF="\${BASE}/Genome_Ref/GRCh38/Homo_sapiens_assembly38.fasta"; \\
-
     export MEM=52; \\
-
     export CLEANUP=1;
-
     export REMOVE_INPUT=1; \\
-
     bsub \\
-
     \-w "done(\\"\${FULLSM}_s00rvtcram\\")" \\
-
     \-J "\${RGBASE}_s01alnsrt" \\
-
     \-o "\${BASE}/WXS_Aquilla/04-LOGS/\${RGBASE}_s01alnsrt.%J" \\
-
     \-u "\${EMAIL}" \\
-
     \-n \${THREADS} -W 2880 \\
-
     \-M 66000000 \\
-
     \-R "rusage[mem=69152]" \\
-
     \-q research-hpc \\
-
     \-a 'docker(achalneupane/bwaref)' \\
-
     /bin/bash; \\
 ```
-
 2.  The rest of the code after achalneupane/bwaref is the same as in Appendix A
-
 3.  Docker image for achalneupane/cram2fastq
-
 ```
     \# RevertSam and SamToFastq are the tools that unwraps the CRAM or BAM files
     into paired FASTQ per RG ID
-
     CUR_STEP="RevertSam"
-
     start=\$(\${DATE}); echo "[\$(display_date \${start})] \${CUR_STEP}
     starting"
-
     "\${TIMING[@]}" /usr/local/openjdk-8/bin/java \${JAVAOPTS} -jar "\${PICARD}"
     \\
-
     "\${CUR_STEP}" \\
-
     \-I "\${CRAMFILE}" \\
-
     \-R \${REF} \\
-
     \-O /dev/stdout \\
-
     \-SORT_ORDER queryname \\
-
     \-COMPRESSION_LEVEL 0 \\
-
     \-VALIDATION_STRINGENCY SILENT \\
-
     \| /usr/local/openjdk-8/bin/java \${JAVAOPTS} -jar "\${PICARD}" \\
-
     SamToFastq \\
-
     \-I /dev/stdin \\
-
     \-R \${REF} \\
-
     \-OUTPUT_PER_RG true \\
-
     \-RG_TAG ID \\
-
     \-OUTPUT_DIR "\${OUT_DIR}" \\
-
     \-VALIDATION_STRINGENCY SILENT
-
     \# Transfer of files
-
     CUR_STEP="Transfer of files"
-
     start=\$(\${DATE}); echo "[\$(display_date \${start})] \${CUR_STEP}
     starting"
-
     CRAMLINES=\$(samtools idxstats "\${CRAMFILE}" \| awk '{s+=\$3+\$4} END
     {print s\*4}')
-
     FQLINES=\$(cat \${OUT_DIR}/\*.fastq \| wc -l)
-
     if [ ! -z \${DEBUG} ]; then
-
     echo "\${CRAMLINES} lines in .cram/bam"
-
     echo "\${FQLINES} lines in all .fastq files"
-
     if [ \$(echo "scale=2;\${FQLINES}/\${CRAMLINES} \> 0.90" \| bc) -eq 0 ];
     then
-
     echo "Warning, .fastq files contain less than 90% of the number of reads of
     .cram/bam file"
-
     fi
-
     fi
-
     \#\# Create RGFILE
-
     CUR_STEP="Create RGFILE"
-
     start=\$(\${DATE}); echo "[\$(display_date \${start})] \${CUR_STEP}
     starting"
-
     if [ ! -z "\${CREATE_RGFILE}" ]; then
-
     SM="\$(echo "\${FULLSM}" \| cut -d\^ -f1)"
-
     DNA="\$(echo "\${FULLSM}" \| cut -d\^ -f2)"
-
     PR="\$(echo "\${FULLSM}" \| cut -d\^ -f3)"
-
     IFS=\$'\\n' RGS=(\$(samtools view -H "\${CRAMFILE}" \| grep "\^@RG"))
-
     echo "Creating \${\#RGS[@]} .rgfiles for newly created .fastq files"
-
     echo "Moving \${\#RGS[@]} .fastq files to \${OUT_DIR}/"
-
     for RG in \${RGS[@]}; do
-
     RGID="\$(echo \${RG} \| grep -oP "(?\<=ID:)[\^[:space:]]\*")"
-
     RGID_NEW="\$(echo \${RGID} \| cut -d: -f2- \| sed 's/:/\^/g')"
-
     mv -vf "\${OUT_DIR}/\${RGID//:/_}_1.fastq"
     "\${OUT_DIR}/\${FULLSM}.\${RGID_NEW}.r1.fastq"
-
     if [ -f "\${OUT_DIR}/\${RGID//:/_}_2.fastq" ]; then mv -vf
     "\${OUT_DIR}/\${RGID//:/_}_2.fastq"
     "\${OUT_DIR}/\${FULLSM}.\${RGID_NEW}.r2.fastq"; fi
-
     RGPU="\$(echo \${RG} \| grep -oP "(?\<=PU:)[\^[:space:]]\*")"
-
     RGLB="\${SM}.\${PR}"
-
     echo
     "@RG\\tID:\${RGID}\\tPL:illumina\\tPU:\${RGPU}\\tLB:\${RGLB}\\tSM:\${SM}\\tDS:\${SM}\^\${DNA}\^\${PR}"
     \> "\${OUT_DIR}/\${FULLSM}.\${RGID_NEW}.rgfile"
-
     done
-
     fi
-
     \#\# Cleaning up files
-
     CUR_STEP="Cleaning up files"
-
     start=\$(\${DATE}); echo "[\$(display_date \${start})] \${CUR_STEP}
     starting"
-
     if [ \${exitcode} -eq 0 ] && [ \${REMOVE_INPUT} -eq 1 ]; then
-
     rm -fv "\${CRAMFILE}" "\${CRAMFILE%.cram}.crai" "\${CRAMFILE}.crai"
     2\>/dev/null
-
     echo -e "REMOVE_INPUT was set to \${REMOVE_INPUT} then CRAMFILE is removed"
-
     else
-
     echo -e "REMOVE_INPUT was set to \${REMOVE_INPUT} then CRAMFILE is NOT
     removed"
-
     fi
 ```
-
 ### Appendix D- BAM to FASTQ processing (specific to the ADNI project)
-
 1.  Docker image (achalneupane/bam2fqv2) to extract interleaved FASTQ from BAM
-
 ```
     \# Extract read Group information
-
     IFS=\$'\\n' RGS=(\$(samtools view -@ \${THREADS} -h \${BAMFILE} \| head -n
     10000000 \| grep \^HS2000 \| cut -d\$'\\t' -f1\| cut -d: -f1,2 \| sort -V \|
     uniq \| grep \^HS2000))
-
     echo "Readgroups are \${RGS[@]}"
-
     unset IFS
-
     args=(tee)
-
     for RG in \${RGS[@]}; do
-
     args+=(\\\>\\(grep -A3 --no-group-separator \\"\^@\${RG/\^/:}:\\" \\\| gzip
     \\\> \${OUT_DIR}/\${SM}\^\${DNA}\^\${PR}.\${RG/:/.}.fq.gz\\))
-
     done
-
     args+=(\\\>/dev/null)
-
     JAVA="/usr/local/openjdk-8/bin/java"
-
     \# JAVAOPTS="-Xms2g -Xmx\${MEM}g -XX:+UseSerialGC
     \-Dpicard.useLegacyParser=false"
-
     JAVAOPTS="-Xms4g -Xmx\${MEM}g -XX:ParallelGCThreads=\${THREADS}
     \-Djava.io.tmpdir=\${TMP_DIR}"
-
     CUR_STEP="RevertSam"
-
     start=\$(\${DATE}); echo "[\$(display_date \${start})] \${CUR_STEP}
     starting"
-
     "\${TIMING[@]}" \${JAVA} \${JAVAOPTS} -jar "\${PICARD}" \\
-
     "\${CUR_STEP}" \\
-
     I="\${BAMFILE}" \\
-
     O=/dev/stdout \\
-
     SORT_ORDER=queryname \\
-
     COMPRESSION_LEVEL=0 \\
-
     VALIDATION_STRINGENCY=SILENT \\
-
     TMP_DIR=\${TMP_DIR} \\
-
     \| \${JAVA} \${JAVAOPTS} -jar "\${PICARD}" \\
-
     SamToFastq \\
-
     I=/dev/stdin \\
-
     FASTQ=/dev/stdout \\
-
     INTERLEAVE=TRUE \\
-
     VALIDATION_STRINGENCY=SILENT \\
-
     TMP_DIR=\${TMP_DIR} \| eval \${args[@]}
-
     arr=(\${PIPESTATUS[@]}); exitcode=0; for i in \${arr[@]}; do
     ((exitcode+=i)); done
 ```
-
 2.  The rest of the pipeline is the same as in Appendix C + Appendix B
-
 ### Appendix E- SRA to FASTQ
-
 1.  Function to download SRA and extract FASTQ
-
 ```
     getSRAtoFastq()
-
     {
-
     DIR=\$1
-
     SAMPLE=\$2
-
     mkdir -p \${DIR}/\${SAMPLE}
-
     SRR="\$(echo \$SAMPLE \| cut -d\^ -f2)"
-
     echo "Doing: " \${SRR}
-
     \# LOOKUP="/30/dbGaP/6109/sra/lookup.csv"
-
     \# If \*.Confirm.txt file is not present; then only run this. We will also
     validate SRA and fastqs as we download/process.
-
     if ! [ -f \${DIR}/\${SAMPLE}/\*".Confirm.txt" ]; then
-
     prefetch --ngc /30/dbGaP/6109/prj_6109.ngc \${SRR}
-
     vdb-validate ./\${SRR} 2\> \>(grep -i Column)
-
     vdb-validate ./\${SRR} 2\> "\${DIR}/vdbValidate/vdb-validate_\${SRR}.txt"
-
     cat "\${DIR}/vdbValidate/vdb-validate_\${SRR}.txt" \| grep Column \>
     "\${DIR}/vdbValidate/Columns_\${SRR}.txt"
-
     col_numbers="\$(cat "\${DIR}/vdbValidate/Columns_\${SRR}.txt" \| wc -l)"
-
     ok_numbers="\$(cat "\${DIR}/vdbValidate/Columns_\${SRR}.txt" \| grep ok \|
     wc -l)"
-
     if [ \${col_numbers} -eq \${ok_numbers} ] && [ \${col_numbers} -ne 0 ]; then
-
     \#start fq split
-
     echo \$col_numbers "Cols are equal " \$ok_numbers "OKs" \>
     "\${DIR}/\${SAMPLE}/\${SAMPLE}.txt"
-
     IFS=\$'\\n'
-
     RGLINES=(\$(sam-dump --ngc /30/dbGaP/6109/prj_6109.ngc ./\${SRR} \| sed -n
     '/\^[\^@]/!p;//q' \| grep \^@RG))
-
     args=(tee)
-
     for RGLINE in \${RGLINES[@]}; do
-
     unset IFS
-
     RG=(\${RGLINE})
-
     args+=(\\\>\\(grep -A3 --no-group-separator \\"\\\\.\${RG[1]\#ID:}/[12]\$\\"
     \\\| gzip \\\>
     "./\${SRR}.\${RG[1]\#ID:}.fastq-dump.split.defline.z.tee.fq.gz"\\))
-
     done
-
     args+=(\\\>/dev/null)
-
     echo "Splitting \${SRR}.sra into \${\#RGLINES[@]} ReadGroups"
-
     \#\#\# NOTE: split-e wouldn't work in the downstream pipeline!!!!!
-
     \# wget
     http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
-
     \# fastq-dump --ngc /30/dbGaP/6109/prj_6109.ngc --skip-technical --split-e
     \--defline-seq '@\$ac.\$si.\$sg/\$ri' --defline-qual '+' -Z "./\${SRR}" \|
     eval \${args[@]}
-
     /30/dbGaP/6109/sra/phs000572_201802/fqgz/test/sratoolkit.2.10.8-ubuntu64/bin/fastq-dump-orig.2.10.8
     \--ngc /30/dbGaP/6109/prj_6109.ngc --split-3 --defline-seq
     '@\$ac.\$si.\$sg/\$ri' --defline-qual '+' -Z "./\${SRR}" \| eval \${args[@]}
-
     if [ \$? -ne 0 ]; then
-
     echo "Error running fastq-dump, exiting."
-
     exit 1
-
     fi
-
     \# Validate the .fq.gz that are produced. Ensuring the dowloand was not
     faulty
-
     if [ \$(ls "./\${SRR}"\*fq 2\>/dev/null \| wc -l) -eq 0 ]; then
-
     if [ \$(ls "./\${SRR}"\*fq.gz 2\>/dev/null \| wc -l) -eq 0 ]; then
-
     echo "Error, cannot find any .fq or .fq.gz files for \${SRR}"
-
     exit 1
-
     else
-
     MODE=gz
-
     EXT="fq.gz"
-
     fi
-
     else
-
     MODE=fq
-
     EXT="fq"
-
     fi
-
     echo "Validating .\${EXT} created from \${SRR}"
-
     exitcode=0
-
     IFS=\$'\\n'
-
     SRAINFO=(\$(/usr/local/genome/bin/sra-stat --ngc /30/dbGaP/6109/prj_6109.ngc
     \--quick ./\${SRR}))
-
     for line in \${SRAINFO[@]}; do
-
     IFS="\|"
-
     split1=(\${line})
-
     RG=\${split1[1]}
-
     IFS=":"
-
     split2=(\${split1[2]})
-
     READS=\${split2[0]}
-
     ((READS\*=8))
-
     unset IFS
-
     echo -n "Checking \${SRR} ReadGroup \${RG}, expect \${READS} lines..."
-
     if [ \${MODE} = "gz" ]; then
-
     LINES=\$(zcat "./\${SRR}.\${RG}.fastq-dump.split.defline.z.tee.\${EXT}" \|
     wc -l)
-
     elif [ \${MODE} = "fq" ]; then
-
     LINES=\$(wc -l "./\${SRR}.\${RG}.fastq-dump.split.defline.z.tee.\${EXT}")
-
     fi
-
     echo "found \${LINES}"
-
     if [ \${READS} -ne \${LINES} ]; then
-
     ((exitcode+=1))
-
     fi
-
     done
-
     if [ \${exitcode} -eq 0 ]; then
-
     SM="\$(echo \$SAMPLE \| cut -d\^ -f1)";
-
     DNA="\${SRR}"
-
     PR="\$(echo \$SAMPLE \| cut -d\^ -f3)";
-
     FULLSM="\${SM}\^\${DNA}\^\${PR}"
-
     IFS=\$'\\n'
-
     for RGLINE in \${RGLINES[@]}; do
-
     OLD_RGID=\$(echo \${RGLINE} \| grep -o "ID:[\^[:space:]]\*" \| sed
     's/ID://g')
-
     NEW_RGID=\$(echo \${OLD_RGID} \| sed 's/\\./\^/g;s/_/\^/g')
-
     mv "\${SRR}.\${OLD_RGID}.fastq-dump.split.defline.z.tee.\${EXT}"
     "./\${FULLSM}/\${FULLSM}.\${NEW_RGID}.\${EXT}"
-
     echo \${RGLINE} \| sed
     "s@\\bSM:\\([\^[:space:]]\*\\)\\([[:space:]]\\)@SM:\${SM}\\2@g;s/\\t/\\\\\\t/g"
     \> "./\${FULLSM}/\${FULLSM}.\${NEW_RGID}.rgfile"
-
     done
-
     echo "All spots from \${SRR} are represented in associated .\${EXT} files"
     \> "./\${FULLSM}/\${FULLSM}.Confirm.txt"
-
     rm -rf \${SRR}
-
     unset IFS
-
     elif [ \${exitcode} -ne 0 ]; then
-
     echo "Errors encountered" \>\> "\${DIR}/DIRerrors/\${SAMPLE}.txt"
-
     rm -rf \${SRR}
-
     fi
-
     fi
-
     rm -rf \${SRR}
-
     srr_count="\$(find \${DIR}/\*/\*.Confirm.txt \| wc -l)";
-
     echo "Now getting SRR count: " \$srr_count
-
     fi
-
     }
 ```
-
 2.  Run the function getSRAtoFastq
-
 ```
     export -f getSRAtoFastq export \${DIR} export
     WORKLIST="\${DIR}/phs000572_201707_94samples_achal.csv" export srr_count=0
-
     \# I will download 8 SRAs in parallel
-
     while [ \${srr_count} -lt 94 ]; do parallel -j8 getSRAtoFastq \${DIR} {}
     :::: "\${WORKLIST}"
-
     srr_count="\$(find \${DIR}/\*/\*.Confirm.txt \| wc -l)"; echo "Now getting
     SRR count: " \$srr_count done
 ```
-
 3.  The rest of the pipeline is the same as in Appendix B
-
 ### Appendix F- Joint calling pipeline
-
 ```
 1.  GenomicsDBIMPORT
-
     EMAIL="achal@wustl.edu"
-
     arr="\$(echo {1..22} X Y)"
-
     len=\${\#arr[\*]}
-
     \#iterate with a for loop
-
     export BASE="/gscmnt/gc2645/wgs"; \\
-
     export TILEDB_DISABLE_FILE_LOCKING=1; \\
-
     export MEM=40; \\
-
     export mylist="\${BASE}/WXS_Aquilla/03-FINAL/VCFs/ID_LIST_genomicsDB.list";
     \\
-
     \# /tmp folder on MGI is limited to 250gb, but this process requires \~3TB
     of tmp space to process \~8000 samples
-
     export tmpPATH="\${BASE}/WXS_Aquilla/gvcfTest/temp/"; \\
-
     export THREADS=16;
-
     for (( i=0; i\<len; i++ ));
-
     do
-
     CHR="chr\${arr[\$i]}"
-
     echo "Doing ::" \${CHR}
-
     \# Define WORKING Directory
-
     export WORKDIR="\${BASE}/WXS_Aquilla//03-FINAL/VCFs/\${CHR}"; \\
-
     bsub \\
-
     \-J "OtoDB\${CHR}" \\
-
     \-u "\${EMAIL}" \\
-
     \-n \${THREADS} -W 25160 \\
-
     \-M 490000000 \\
-
     \-R "rusage[mem=49152]" \\
-
     \-o "\${BASE}/WXS_Aquilla//03-FINAL/VCFs/\${CHR}.%J" \\
-
     \-q research-hpc \\
-
     \-a "docker(broadinstitute/gatk:4.1.2.0)" \\
-
     /gatk/gatk --java-options "-Xms4G -Xmx\${MEM}G
     \-DGATK_STACKTRACE_ON_USER_EXCEPTION=true" GenomicsDBImport \\
-
     \--genomicsdb-workspace-path \${WORKDIR} \\
-
     \--batch-size 50 \\
-
     \-L \${CHR} \\
-
     \--sample-name-map \${mylist} \\
-
     \--tmp-dir=\${tmpPATH} \\
-
     \--max-num-intervals-to-import-in-parallel 10 \\
-
     \--reader-threads \${THREADS}
-
     Done
 ```
-
 2.  GenotypeGVCFs
-
 ```
     EMAIL="achal@wustl.edu"
-
     arr="\$(echo {1..22} X Y)"
-
     len=\${\#arr[\*]}
-
     \#iterate with for loop
-
     cd /gscmnt/gc2645/wgs/WXS_Aquilla/03-FINAL/VCFs/
-
     export BASE="/gscmnt/gc2645/wgs"; \\
-
     export TILEDB_DISABLE_FILE_LOCKING=1; \\
-
     export REF="\${BASE}/Genome_Ref/GRCh38/Homo_sapiens_assembly38.fasta"; \\
-
     export tmpPATH="--tmp-dir=\${BASE}/WXS_Aquilla/gvcfTest/temp"; \\
-
     for (( i=0; i\<len; i++ )); \\
-
     do
-
     CHR="chr\${arr[\$i]}"; \\
-
     echo "Doing :: \${CHR}"; \\
-
     \# Make sure you have three ///
-
     export DB="-V gendb:///\${BASE}/WXS_Aquilla/03-FINAL/VCFs/\${CHR}"; \\
-
     export
     OUTvcf="\${BASE}/WXS_Aquilla/03-FINAL/VCFs/Bloomfield_\${CHR}.vcf.gz"; \\
-
     export MEM=40; \\
-
     bsub \\
-
     \-J "Geno\${CHR}" \\
-
     \-u "\${EMAIL}" \\
-
     \-n1 -W 25160 \\
-
     \-M 49000000 \\
-
     \-R "rusage[mem=49152]" \\
-
     \-o
     "\${BASE}/WXS_Aquilla/03-FINAL/VCFs/Bloomfield_joint_call_logs_\${CHR}.%J"
     \\
-
     \-q research-hpc \\
-
     \-a "docker(broadinstitute/gatk:4.1.2.0)" \\
-
     /gatk/gatk --java-options "-Xms4G -Xmx\${MEM}G
     \-DGATK_STACKTRACE_ON_USER_EXCEPTION=true" GenotypeGVCFs \\
-
     \-R \${REF} \\
-
     \${DB} \\
-
     \-O \${OUTvcf} \\
-
     \${tmpPATH}
-
     sleep 20
-
     done
 ```
