@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VERSION="2.0"
-# Entrypoint script for docker container achalneupane/intersectbed:${VERSION} 
+# Entrypoint script for docker container achalneupane/intersectbedref:${VERSION} 
 # modified from version 1.0 so that thsi ones asks the user to provide refenrece and intermediate files
 
 # Parameters must be defined so the script knows which file(s) to process
